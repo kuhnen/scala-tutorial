@@ -1,29 +1,57 @@
 package com.github.kuhnen
 
-import java.net.URL
+import java.net.{MalformedURLException, URL}
 import java.io.InputStream
 import scala.concurrent.Future
-import scala.io.Source
+import scala.io.{Codec, Source}
 import scala.util.Try
 
 /**
  * Created by kuhnen on 3/23/15.
  */
 
-object MonadsTutorial {
+object MonadsTutorialTryExample {
+
+  import UrlExample._
+
+  def main(args: Array[String]): Unit = {
+
+    val maybeProtocol: Try[String] = parseURL("http://www.google.com").map(_.getProtocol)
+
+    maybeProtocol.foreach { protocol =>
+      println(s"The protocol is $protocol" )
+    }
+
+    val maybeNotProtocol = parseURL("notValidUrl").map(_.getProtocol)
+
+    maybeNotProtocol.foreach { protocol =>
+      println(s"The protocol is $protocol" )
+    }
+
+    val maybeNotProtocolWithRecover: Try[String] = parseURL("notValidUrl").map(_.getProtocol).recover { case e: Exception =>
+      s"OOHHHH that was a bad URL was bad his URL: ${e}"
+    }
 
 
-  def main(args: Array[String]) {
+    maybeNotProtocolWithRecover.foreach { protocol =>
+      println(s"The protocol is $protocol" )
+    }
+
+    getURLContent("http://www.google.com").foreach(it => it.take(1) foreach println)
+
+    val math = Try(1)
+    val fuckedOperation = math.map(_ + 4).map(_ / 0).map(_ * 10)
+    println(fuckedOperation)
+    val fuckedOperationWithRecover = math.map(_ + 4).map(_ / 0).map(_ * 10).recover { case e: Exception => 0}
+    println(fuckedOperationWithRecover)
 
   }
+
+
 }
 
-//First example:
-// parseUrl("http://www.google.com").map(_.getProtocol)
-// parseUrl("notValidUrl").map(_.getProtocol)
 
 object UrlExample {
-
 
   def parseURL(url: String): Try[URL] = Try(new URL(url))
 
@@ -43,19 +71,15 @@ object UrlExample {
     stream <- Try(connection.getInputStream)
   } yield stream
 
+
   def getURLContent(url: String): Try[Iterator[String]] =
     for {
       url <- parseURL(url)
       connection <- Try(url.openConnection())
       is <- Try(connection.getInputStream)
-      source = Source.fromInputStream(is)
+      source = Source.fromInputStream(is)(Codec.ISO8859)
     } yield source.getLines()
 
-  //def getURLContentFuture(url: String) = Future {
-
-  //}
-  //SimilarOffers example:
-  //https://github.com/chaordic/platform-market/blob/master/core/src/main/scala/com/chaordicsystems/platform/market/core/business/OfferBusiness.scala#L48-L71
 
 }
 

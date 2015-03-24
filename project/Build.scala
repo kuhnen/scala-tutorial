@@ -42,10 +42,10 @@ object MondasBuild extends Build {
       "-Xlint",
       "-Ywarn-dead-code",
       "-language:_",
-      "-target:jvm-1.8",
+      "-target:jvm-1.7",
       "-encoding", "UTF-8",
       "-Yclosure-elim",
-      "-Xfatal-warnings",
+      //"-Xfatal-warnings",
       "-Yinline",
       "-Xverify",
       "-feature"
