@@ -20,7 +20,16 @@ object MondasBuild extends Build {
     resourceDirectory in Compile := resourceMainPath.value
     )
 
-override lazy val settings = super.settings ++ Seq(
+  val actors= Project(
+    id = "actors",
+    base = file("actors"),
+    settings = Revolver.settings) settings(
+    resourceDirectory in Test := resourceTestPath.value,
+    resourceDirectory in Compile := resourceMainPath.value
+    ) enablePlugins(SbtOneLog)
+
+
+  override lazy val settings = super.settings ++ Seq(
     organization := "com.github.kuhnen",
     name := "tutorial",
     version := "0.1",
